@@ -54,7 +54,9 @@ void logLine(const string& actorType, int actorId,
          << message << '\n';
 }
 
-void logResource(const string& actorType, int actorId,const string& resource,const string& message)
+void logResource(const string& actorType, int actorId,
+                 const string& resource,
+                 const string& message)
 {
     lock_guard<mutex> lk(coutMutex);
     cout << actorType << ' ' << actorId << " [" << resource << "]: "
@@ -120,13 +122,116 @@ void customer(int id)
 void teller(int id)
 {
     logLine("Teller", id, "Teller", id, "ready to serve");
+
+    bool iAmLast = false;
+    {
+        lock_guard<mutex> lk(bankMutex);
+        ++tellerReadyCount;
+        if (tellerReadyCount == numtellers) {
+            bankIsOpen = true;
+            bankCV.notify_all();
+            iAmLast = true;
+        }
+    }
+
+    if (iAmLast) 
+    {
+        logLine("Teller", id, "Teller", id, "bank is now open");
+    }
+
+    while (true) 
+    {
+        logLine("Teller", id, "Teller", id, "waiting for customer");
+        customerReady.acquire();
+
+        if (bankClosed) 
+        {
+            break;
+        }
+
+        int customerId;
+        {
+            lock_guard<mutex> lk(queueMutex);
+            if (customerQueue.empty()) 
+            {
+                continue;
+            }
+            customerId = customerQueue.front();
+            customerQueue.pop();
+        }
+
+        assignedTeller[customerId] = id;
+        customerAssigned[customerId]->release();
+
+        logLine("Teller", id, "Customer", customerId, "serving customer");
+
+        logLine("Teller", id, "Customer", customerId, "asks for transaction type");
+        tellerAskSem[id - 1]->release();
+
+        customerTellSem[id - 1]->acquire();
+        const string txn = transactionType[customerId];
+        logLine("Teller", id, "Customer", customerId,
+                "received " + txn + " request");
+
+        if (txn == "Withdrawal") 
+        {
+            logResource("Teller", id, "Manager", "going to manager");
+            managerSem.acquire();
+            logResource("Teller", id, "Manager", "with manager");
+            logResource("Teller", id, "Manager", "waiting for manager approval");
+            this_thread::sleep_for(chrono::milliseconds(rand() % 26 + 5));
+            logResource("Teller", id, "Manager", "manager approval complete");
+            logResource("Teller", id, "Manager", "done with manager");
+            managerSem.release();
+        }
+
+        logResource("Teller", id, "Safe", "going to safe");
+        safeSem.acquire();
+        logResource("Teller", id, "Safe", "in safe");
+        logResource("Teller", id, "Safe", "performing transaction");
+        this_thread::sleep_for(chrono::milliseconds(rand() % 41 + 10));
+        logResource("Teller", id, "Safe", "transaction in safe complete");
+        logResource("Teller", id, "Safe", "done in safe");
+        safeSem.release();
+
+        logLine("Teller", id, "Customer", customerId,
+                "transaction complete, notifying customer");
+        customerDone[customerId]->release();
+
+        logLine("Teller", id, "Customer", customerId,
+                "waiting for customer to leave");
+        customerLeftSem[id - 1]->acquire();
+        logLine("Teller", id, "Teller", id, "customer has left");
+
+        bool allDone = false;
+        {
+            lock_guard<mutex> lk(servedMutex);
+            ++servedCustomers;
+            if (servedCustomers == numcustomers) 
+            {
+                bankClosed = true;
+                allDone = true;
+            }
+        }
+
+        if (allDone) 
+        {
+            logLine("Teller", id, "Teller", id,
+                    "all customers served, bank closing");
+            for (int i = 0; i < numtellers - 1; ++i) 
+            {
+                customerReady.release();
+            }
+            break;
+        }
+    }
 }
 
 int main()
 {
     srand(static_cast<unsigned>(time(nullptr)));
 
-    for (int i = 0; i < numcustomers; ++i) 
+    for (int i = 0; i < numcustomers; ++i)
     {
         customerAssigned[i] = new binary_semaphore(0);
         customerDone[i] = new binary_semaphore(0);
