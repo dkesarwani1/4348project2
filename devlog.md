@@ -110,3 +110,8 @@ memory cleanup for dynamically allocated semaphores
 This step produces the completed program that should complete the objectives of the project.
 
 Now I will do some testing to make sure it works successfully.
+
+## April 17th 6:22 PM
+Reflection: I tested the Program and it works successfully and gives the correct output format. 
+
+This project involved building a multithreaded bank simulation using C++ threads, mutexes, condition variables, and semaphores to model real-world synchronization constraints. The most important part of the implementation was planning out the interactions between customers and tellers while enforcing those rules through things such as limited access to the manager (1 teller), safe (2 tellers), and doorway (2 customers). Semaphores are used to control these shared resources and implemented a structured handshake between customer and teller threads to ensure the correct sequence of events, which are ask → respond → process → complete. I also used a mutex-protected queue to manage customers waiting for service and condition variables to ensure the bank only opened once all tellers were ready. This hells with the understanding of critical sections, thread coordination, and avoiding race conditions in concurrent systems.
