@@ -64,3 +64,27 @@ leaves the bank and signals the teller that it has left the place
 This step is where the simulation starts to resemble the actual assignment instead of just a thread demo.
 
 This is impotant because customer actions in the PDF are very specific in what they want to do, especially waiting for the bank to open, passing through the door, getting in line, waiting for the teller, and not leaving until the transaction is complete. This step implements that full customer-side behavior.
+
+## April 17th 3:35 PM
+Step 4 — Build the teller workflow and transaction handling
+What I did
+
+In this step, I implemented the teller logic. Each teller will:
+
+announces readiness
+helps open the bank once all tellers are ready
+waits for a customer
+removes a customer from the queue
+assigns itself to that customer
+asks for the transaction
+waits for the customer to respond
+if the transaction is a withdrawal, goes to the manager first
+goes to the safe and performs the transaction
+notifies the customer when done
+waits for the customer to leave
+updates the count of served customers
+helps shut down the bank after all 50 customers are finished
+
+This is where the central synchronization of the project is completed.
+
+The importance of this is that the teller behavior is the heart of the assignment. The project states that for withdrawals to go through the manager, only one teller to use the manager at a time, only two tellers in the safe at once, and customers not to leave until the teller finishes its job. This step implements all of that.
