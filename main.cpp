@@ -45,22 +45,16 @@ binary_semaphore* customerLeftSem[numtellers];
 int assignedTeller[numcustomers];
 string transactionType[numcustomers];
 
-void logLine(const string& actorType, int actorId,
-             const string& targetType, int targetId,
-             const string& message)
+void logLine(const string& actorType, int actorId,const string& targetType, int targetId,const string& message)
 {
     lock_guard<mutex> lk(coutMutex);
-    cout << actorType << ' ' << actorId << " [" << targetType << ' ' << targetId << "]: "
-         << message << '\n';
+    cout << actorType << ' ' << actorId << " [" << targetType << ' ' << targetId << "]: " << message << '\n';
 }
 
-void logResource(const string& actorType, int actorId,
-                 const string& resource,
-                 const string& message)
+void logResource(const string& actorType, int actorId,const string& resource, const string& message)
 {
     lock_guard<mutex> lk(coutMutex);
-    cout << actorType << ' ' << actorId << " [" << resource << "]: "
-         << message << '\n';
+    cout << actorType << ' ' << actorId << " [" << resource << "]: " << message << '\n';
 }
 
 void passThroughDoor(int customerId, const string& actionMessage)
@@ -134,26 +128,22 @@ void teller(int id)
         }
     }
 
-    if (iAmLast) 
-    {
+    if (iAmLast) {
         logLine("Teller", id, "Teller", id, "bank is now open");
     }
 
-    while (true) 
-    {
+    while (true) {
         logLine("Teller", id, "Teller", id, "waiting for customer");
         customerReady.acquire();
 
-        if (bankClosed) 
-        {
+        if (bankClosed) {
             break;
         }
 
         int customerId;
         {
             lock_guard<mutex> lk(queueMutex);
-            if (customerQueue.empty()) 
-            {
+            if (customerQueue.empty()) {
                 continue;
             }
             customerId = customerQueue.front();
@@ -173,8 +163,7 @@ void teller(int id)
         logLine("Teller", id, "Customer", customerId,
                 "received " + txn + " request");
 
-        if (txn == "Withdrawal") 
-        {
+        if (txn == "Withdrawal") {
             logResource("Teller", id, "Manager", "going to manager");
             managerSem.acquire();
             logResource("Teller", id, "Manager", "with manager");
@@ -207,8 +196,7 @@ void teller(int id)
         {
             lock_guard<mutex> lk(servedMutex);
             ++servedCustomers;
-            if (servedCustomers == numcustomers) 
-            {
+            if (servedCustomers == numcustomers) {
                 bankClosed = true;
                 allDone = true;
             }
@@ -231,7 +219,7 @@ int main()
 {
     srand(static_cast<unsigned>(time(nullptr)));
 
-    for (int i = 0; i < numcustomers; ++i)
+    for (int i = 0; i < numcustomers; ++i) 
     {
         customerAssigned[i] = new binary_semaphore(0);
         customerDone[i] = new binary_semaphore(0);
