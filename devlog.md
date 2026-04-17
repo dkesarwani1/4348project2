@@ -88,3 +88,25 @@ helps shut down the bank after all 50 customers are finished
 This is where the central synchronization of the project is completed.
 
 The importance of this is that the teller behavior is the heart of the assignment. The project states that for withdrawals to go through the manager, only one teller to use the manager at a time, only two tellers in the safe at once, and customers not to leave until the teller finishes its job. This step implements all of that.
+
+## April 17th 5:35 PM
+Step 5 — Finalize the full program
+
+In this final stage, I completed and cleaned up the full simulation. This version has:
+
+all required headers
+all shared semaphores and mutexes
+bank opening logic
+customer queueing
+teller assignment
+customer and teller handshaking
+manager and safe access control
+proper waiting and signaling
+customer exit handling
+tracking when all 50 customers are served
+graceful shutdown of teller threads
+memory cleanup for dynamically allocated semaphores
+
+This step produces the completed program that should complete the objectives of the project.
+
+Now I will do some testing to make sure it works successfully.
