@@ -16,11 +16,9 @@ a customer thread function
 a teller thread function
 thread creation in main()
 
-This step lays the groundwork for everything else. It makes sure the program can launch the correct number of threads and gives the project a clear starting point.
+This step lays the strucuture of code for everything else. It makes sure the program can launch the correct number of threads and gives the project a clear starting point.
 
-Why this step matters
-
-This follows the project suggestion to start with the interaction structure first rather than immediately trying to solve all synchronization at once. Before handling manager access, safe access, line order, and customer-teller coordination, the program first needs the thread-based skeleton.
+This step is important follows the project suggestion to start with the interaction structure first rather than immediately trying to solve all synchronization at once. Before handling manager access, safe access, line order, and customer-teller coordination, the program first needs the thread-based skeleton.
 
 ## April 17th 11:45 AM
 Step 2 — Add shared resources, semaphores, and logging helpers
@@ -43,3 +41,26 @@ a passThroughDoor() helper to model the doorway behavior
 This step is important because the project depends a lot on synchronization. These resources are the main tools that make the simulation safe and correct.
 
 This is important because the project requires shared resources such as the manager and safe to be protected and also says other semaphores will be needed so customers and tellers wait for each other at the correct times. This step is where the synchronization tools have to be added.
+
+## April 17th 1:03 PM
+Devlog Step 3 — Build the customer Process
+
+In this step, I developed the customer thread so it follows on what the customer does.
+
+The customer now:
+
+randomly chooses deposit or withdrawal
+waits a random amount of time before arriving
+waits for the bank to open
+enters through the door
+gets in line
+waits until assigned to a teller
+introduces itself
+waits for the teller to ask for the transaction
+gives the transaction type
+waits for the teller to finish
+leaves the bank and signals the teller that it has left the place
+
+This step is where the simulation starts to resemble the actual assignment instead of just a thread demo.
+
+This is impotant because customer actions in the PDF are very specific in what they want to do, especially waiting for the bank to open, passing through the door, getting in line, waiting for the teller, and not leaving until the transaction is complete. This step implements that full customer-side behavior.
